@@ -1,15 +1,21 @@
+import os
 import requests
 from pprint import pprint
+from datetime import datetime
+from dotenv import load_dotenv
+import locale
+
+# функция отвечабщая за язык печати
+# locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 
 
-def get_weather_request(
-    city,
-    api_key,
-):
+def get_weather_request(city, api_key):
     try:
+
         response = requests.get(
-            f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}'
+            f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
         )
+
         # в data хранится список в формате json
         data = response.json()
         # pprint(data)
@@ -19,17 +25,18 @@ def get_weather_request(
         humidity = data["main"]["humidity"]
         pressure = data["main"]["pressure"]
         temp = data["main"]["temp"]
+        wind = data["wind"]["speed"]
 
-        print(f'Ваш город: {name_city}\n'
-              f'Влажность в городе {humidity}\nДавление в городе {pressure}\n'
-              f'Температура в городе {temp}')
+        return f'{datetime.now().strftime("%d %B %Y")}\nВаш город: {name_city}\nВлажность в городе {humidity}\nДавление в городе {pressure}\nТемпература в городе {temp}\nСкорость ветра {wind}'
 
+    # исключение на не существующий город
     except Exception as ex:
         print(ex)
-        print('Такого города не существует!')
+        return 'Такого города не существует!'
 
 
-# Запуск кода
 if __name__ == '__main__':
+    # инпут работает по default='ru-en'
+    load_dotenv()
     city = input('Назовите город: ')
-    get_weather_request(city, api_key='d37a79b496bba43ff51ed9c070d17eb1')
+    get_weather_request(city, api_key=os.environ.get('WEATHER_GET_APITOKEN'))
